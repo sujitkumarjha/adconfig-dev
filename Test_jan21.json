@@ -1,0 +1,94 @@
+{
+  "version": "202011230001",
+  "OmPartnerName": "Mxplayerin",
+  "periodOfValiditySeconds": "3600",
+  "adGroupName": "RBOB60_GP_1.32.00_above_2020_11_23_01",
+  "ad_config": {
+    "app": {
+      "interstitialOnExit": {
+        "ads": [
+          {
+            "id": "/21723553151/MXPlayer_Games/Rewarded_Interstitial/Exit_Interstitial_GP",
+            "type": "DFPInterstitial"
+          }
+        ],
+        "type": "DFPInterstitial",
+        "enable": "3",
+        "parallel": "true",
+        "timeInterval": 1800,
+        "videoInterval": 0,
+        "maxShownPerDay": 5
+      },
+      "interstitialForeground": {
+        "default": {
+          "ads": [
+            {
+              "id": "/21723553151/MXPlayer_Android_App_Local/interstitial_Playback/interstitial_Playback",
+              "type": "DFPInterstitial",
+              "noAdTime": 3600
+            },
+            {
+              "id": "/21723553151/MXPlayer_Android_App_Local/interstitial_Playback/interstitial_Playback1",
+              "type": "DFPInterstitial",
+              "noAdTime": 3600
+            },
+            {
+              "id": "/21723553151/MXPlayer_Android_App_Local/interstitial_Playback/interstitial_Playback2",
+              "type": "DFPInterstitial",
+              "noAdTime": 3600
+            }
+          ],
+          "type": "DFPInterstitialForeground",
+          "enable": "3",
+          "minAppUsage": 1,
+          "minDuration": 300,
+          "appInactiveTime": 10,
+          "backgroundFrequency": 3
+        },
+        "games": {
+          "ads": [
+            {
+              "id": "/21723553151/MXPlayer_Android_App_Local/interstitial_Playback/interstitial_Playback",
+              "type": "DFPInterstitial",
+              "noAdTime": 3600
+            }
+          ],
+          "type": "DFPInterstitialForeground",
+          "enable": "0",
+          "minAppUsage": 1,
+          "minDuration": 300,
+          "appInactiveTime": 10,
+          "backgroundFrequency": 3
+        }
+      }
+    },
+    "local": {
+      "interstitialAfterPlayback": {
+        "ads": [
+          {
+            "type": "DFPAppInstallContent",
+            "id": "/6499/example/native-video"
+          }
+        ],
+        "type": "DFPInterstitial",
+        "enable": "3",
+        "preload": true,
+        "noAdTime": 1,
+        "parallel": false,
+        "timeInterval": 1,
+        "videoInterval": 1,
+        "maxShownPerDay": 250
+      }
+    }
+  },
+  "global_config": {
+    "type": {
+      "InAppVideo": {
+        "last_event_time_threshold": 10
+      },
+      "DFPInterstitial": {
+        "last_event_time_threshold": 10
+      }
+    }
+  }
+}
