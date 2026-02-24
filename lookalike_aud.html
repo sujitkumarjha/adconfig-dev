@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osmos Lookalike Audience Console</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        input[type="range"] { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; background: #E2E8F0; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #1877F2; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+        select { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ── ICON COMPONENTS ──
+        const IconChevronRight = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        );
+        const IconCheck = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        );
+        const IconUsers = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        );
+        const IconTarget = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        );
+        const IconSliders = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        );
+        const IconClock = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        );
+        const IconRocket = () => (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        );
+        const IconInfo = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        );
+        const IconSearch = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        );
+        const IconRefresh = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        );
+        const IconShield = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        );
+        const IconDatabase = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        );
+        const IconArrowUp = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        );
+        const IconAlertTriangle = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        );
+
+        // ── PLATFORM DATA ──
+        const PLATFORMS = {
+          meta: {
+            name: "Meta", subtitle: "Facebook & Instagram", color: "#1877F2", bgLight: "#EBF3FE", minSeed: 1000,
+            matchRate: { email: 62, phone: 48, multi: 74 }, expansionType: "slider", expansionRange: [1, 10], expansionDefault: 3, expansionUnit: "%",
+            expansionLabels: { 1: "Precision", 5: "Balanced", 10: "Reach" }, buildTime: "24–48h", valueBased: true, incrementalUpdate: false, measurementApi: "Conversions API (CAPI)", logo: "M"
+          },
+          dv360: {
+            name: "DV360", subtitle: "Google Display & Video", color: "#4285F4", bgLight: "#E8F0FE", minSeed: 5000,
+            matchRate: { email: 55, phone: 38, multi: 65 }, expansionType: "toggle", expansionOptions: ["Similar Audiences (Auto)"], expansionDefault: "Similar Audiences (Auto)",
+            buildTime: "48–72h", valueBased: false, incrementalUpdate: true, measurementApi: "Offline Conv / ADH", logo: "G"
+          },
+          snapchat: {
+            name: "Snapchat", subtitle: "Snap Ads", color: "#FFFC00", textColor: "#000", bgLight: "#FFFDE6", minSeed: 2500,
+            matchRate: { email: 45, phone: 35, multi: 58 }, expansionType: "tier", expansionOptions: ["Similarity", "Balance", "Reach"], expansionDefault: "Balance",
+            buildTime: "24–36h", valueBased: false, incrementalUpdate: true, measurementApi: "SCAPI", logo: "S"
+          },
+          tiktok: {
+            name: "TikTok", subtitle: "TikTok Ads", color: "#000000", bgLight: "#F0F0F0", minSeed: 10000,
+            matchRate: { email: 35, phone: 28, multi: 48 }, expansionType: "tier", expansionOptions: ["Narrow", "Balanced", "Broad", "Automatic"], expansionDefault: "Balanced",
+            buildTime: "48–72h", valueBased: false, incrementalUpdate: false, measurementApi: "Events API", logo: "T"
+          },
+          ttd: {
+            name: "The Trade Desk", subtitle: "TTD Programmatic", color: "#00B140", bgLight: "#E6F9ED", minSeed: 5000,
+            matchRate: { email: 50, phone: 40, multi: 68 }, expansionType: "preset", expansionOptions: ["Conservative (1%)", "Standard (5%)", "Aggressive (10%)"], expansionDefault: "Standard (5%)",
+            buildTime: "4–12h", valueBased: false, incrementalUpdate: true, measurementApi: "Offline Conv + Logs", logo: "TTD"
+          }
+        };
+
+        const SEGMENTS = [
+          { id: "seg_001", name: "High-Value Grocery Shoppers", description: "3+ purchases/month, AOV >$85, loyalty gold/platinum", size: 284000, category: "Grocery", signals: ["Purchase frequency", "Basket value", "Loyalty tier"], emailCoverage: 92, phoneCoverage: 67, madidCoverage: 41, lastUpdated: "2h ago", trend: "+4.2%" },
+          { id: "seg_002", name: "Beauty Category Enthusiasts", description: "2+ beauty purchases in 60 days, browse beauty 4x/week", size: 156000, category: "Beauty", signals: ["Category affinity", "Browse frequency", "Purchase recency"], emailCoverage: 88, phoneCoverage: 54, madidCoverage: 38, lastUpdated: "6h ago", trend: "+7.1%" },
+          { id: "seg_003", name: "Electronics Early Adopters", description: "Purchased in electronics within 30 days of launch, premium tier", size: 92000, category: "Electronics", signals: ["Purchase timing", "Category affinity", "Price tier"], emailCoverage: 95, phoneCoverage: 72, madidCoverage: 55, lastUpdated: "1h ago", trend: "+2.8%" },
+          { id: "seg_004", name: "Lapsed High-Spenders", description: "No purchase in 90 days, historical AOV >$120, loyalty member", size: 198000, category: "Cross-category", signals: ["Recency", "Historical value", "Loyalty status"], emailCoverage: 90, phoneCoverage: 61, madidCoverage: 35, lastUpdated: "4h ago", trend: "-1.3%" },
+          { id: "seg_005", name: "New Parent Segment", description: "Baby/toddler category purchases, registered in last 6mo", size: 67000, category: "Baby & Kids", signals: ["Category purchases", "Registration recency", "Life stage"], emailCoverage: 94, phoneCoverage: 78, madidCoverage: 44, lastUpdated: "3h ago", trend: "+12.4%" },
+          { id: "seg_006", name: "Weekend Premium Shoppers", description: "Sat/Sun purchases, AOV >$150, in-store + online", size: 143000, category: "Cross-category", signals: ["Day-of-week", "Basket value", "Channel"], emailCoverage: 85, phoneCoverage: 52, madidCoverage: 30, lastUpdated: "5h ago", trend: "+1.9%" },
+        ];
+
+        const formatNumber = (n) => n?.toLocaleString() ?? "—";
+
+        function PlatformLogo({ platform, size = 32 }) {
+          const p = PLATFORMS[platform];
+          const isSnap = platform === "snapchat";
+          return (
+            <div style={{
+              width: size, height: size, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+              background: p.color, color: isSnap ? "#000" : "#fff", fontSize: size * 0.4, fontWeight: 800, letterSpacing: -0.5,
+              flexShrink: 0, border: isSnap ? "1px solid #E0E0E0" : "none"
+            }}>
+              {p.logo}
+            </div>
+          );
+        }
+
+        function MatchRateBar({ value, color, label }) {
+          return (
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748B", marginBottom: 3 }}>
+                <span>{label}</span><span style={{ fontWeight: 600, color: value >= 50 ? "#059669" : value >= 35 ? "#D97706" : "#DC2626" }}>{value}%</span>
+              </div>
+              <div style={{ height: 6, background: "#F1F5F9", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${value}%`, background: `linear-gradient(90deg, ${color}88, ${color})`, borderRadius: 3, transition: "width 0.6s ease" }} />
+              </div>
+            </div>
+          );
+        }
+
+        function StepIndicator({ steps, current }) {
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: 0, padding: "0 24px", marginBottom: 0 }}>
+              {steps.map((step, i) => {
+                const isActive = i === current;
+                const isComplete = i < current;
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: "fit-content" }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                        background: isComplete ? "#059669" : isActive ? "#1A5276" : "#E2E8F0",
+                        color: isComplete || isActive ? "#fff" : "#94A3B8",
+                        fontSize: 13, fontWeight: 600, transition: "all 0.3s ease",
+                        boxShadow: isActive ? "0 0 0 3px #1A527630" : "none"
+                      }}>
+                        {isComplete ? <IconCheck /> : i + 1}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: isActive ? 700 : 500, color: isActive ? "#1A5276" : isComplete ? "#059669" : "#94A3B8", lineHeight: 1.2 }}>{step.label}</div>
+                        <div style={{ fontSize: 10, color: "#94A3B8", lineHeight: 1.3 }}>{step.sublabel}</div>
+                      </div>
+                    </div>
+                    {i < steps.length - 1 && (
+                      <div style={{ flex: 1, height: 2, background: isComplete ? "#059669" : "#E2E8F0", margin: "0 16px", borderRadius: 1, transition: "background 0.3s ease", minWidth: 24 }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        function Step1({ selectedSegment, setSelectedSegment }) {
+          const [search, setSearch] = useState("");
+          const [categoryFilter, setCategoryFilter] = useState("All");
+          const categories = ["All", ...new Set(SEGMENTS.map(s => s.category))];
+          const filtered = SEGMENTS.filter(s =>
+            (categoryFilter === "All" || s.category === categoryFilter) &&
+            (s.name.toLowerCase().includes(search.toLowerCase()) || s.description.toLowerCase().includes(search.toLowerCase()))
+          );
+          return (
+            <div>
+              <div style={{ marginBottom: 20 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: "#0F172A", margin: 0 }}>Select Seed Audience</h2>
+                <p style={{ fontSize: 13, color: "#64748B", margin: "4px 0 0" }}>Choose a 1P audience segment from Audience Intelligence.</p>
+              </div>
+              <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+                <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+                  <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#94A3B8" }}><IconSearch /></div>
+                  <input type="text" placeholder="Search segments..." value={search} onChange={e => setSearch(e.target.value)}
+                    style={{ width: "100%", padding: "9px 12px 9px 36px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {categories.map(c => (
+                    <button key={c} onClick={() => setCategoryFilter(c)} style={{
+                      padding: "7px 14px", borderRadius: 6, border: "1px solid", fontSize: 12, fontWeight: 500, cursor: "pointer",
+                      borderColor: categoryFilter === c ? "#1A5276" : "#E2E8F0", background: categoryFilter === c ? "#1A5276" : "#fff", color: categoryFilter === c ? "#fff" : "#64748B"
+                    }}>{c}</button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {filtered.map(seg => {
+                  const isSelected = selectedSegment?.id === seg.id;
+                  const meetsMin = seg.size >= 1000;
+                  return (
+                    <div key={seg.id} onClick={() => meetsMin && setSelectedSegment(seg)} style={{
+                      padding: 16, borderRadius: 12, border: `2px solid ${isSelected ? "#1A5276" : "#E2E8F0"}`,
+                      background: isSelected ? "#F0F7FF" : "#fff", cursor: meetsMin ? "pointer" : "not-allowed", transition: "all 0.2s ease", opacity: meetsMin ? 1 : 0.5
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                            <span style={{ fontSize: 15, fontWeight: 600 }}>{seg.name}</span>
+                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#F1F5F9", color: "#64748B" }}>{seg.category}</span>
+                          </div>
+                          <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 10px" }}>{seg.description}</p>
+                          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                              <IconUsers /><span style={{ fontSize: 13, fontWeight: 600 }}>{formatNumber(seg.size)}</span><span style={{ fontSize: 11, color: "#64748B" }}>users</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", minWidth: 120 }}>
+                          <div style={{ fontSize: 11 }}>Email: <b>{seg.emailCoverage}%</b></div>
+                          <div style={{ fontSize: 11 }}>Phone: <b>{seg.phoneCoverage}%</b></div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        function Step2({ selectedSegment, selectedPlatforms, setSelectedPlatforms }) {
+          const togglePlatform = (key) => setSelectedPlatforms(prev => prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key]);
+          const getEstimatedMatch = (platform, seg) => {
+            const p = PLATFORMS[platform];
+            const emailRate = Math.round(p.matchRate.email * (seg.emailCoverage / 100));
+            const phoneRate = Math.round(p.matchRate.phone * (seg.phoneCoverage / 100));
+            const multiRate = Math.round(p.matchRate.multi * ((seg.emailCoverage + seg.phoneCoverage) / 200));
+            return { email: emailRate, phone: phoneRate, multi: multiRate, matched: Math.round(seg.size * multiRate / 100) };
+          };
+          return (
+            <div>
+              <div style={{ marginBottom: 20 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700 }}>Select Platforms & Match Rates</h2>
+                <p style={{ fontSize: 13, color: "#64748B" }}>Review estimated match rates for "{selectedSegment?.name}".</p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {Object.entries(PLATFORMS).map(([key, p]) => {
+                  const isSelected = selectedPlatforms.includes(key);
+                  const est = getEstimatedMatch(key, selectedSegment);
+                  const meetsMin = selectedSegment.size >= p.minSeed;
+                  return (
+                    <div key={key} onClick={() => meetsMin && togglePlatform(key)} style={{
+                      padding: 16, borderRadius: 12, border: `2px solid ${isSelected ? p.color : "#E2E8F0"}`,
+                      background: isSelected ? p.bgLight : "#fff", cursor: meetsMin ? "pointer" : "not-allowed", transition: "all 0.2s", opacity: meetsMin ? 1 : 0.55, position: "relative"
+                    }}>
+                      {isSelected && <div style={{ position: "absolute", top: 8, right: 8, width: 22, height: 22, borderRadius: "50%", background: p.color, display: "flex", alignItems: "center", justifyContent: "center", color: key === "snapchat" ? "#000" : "#fff" }}><IconCheck /></div>}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                        <PlatformLogo platform={key} size={36} />
+                        <div><div style={{ fontSize: 14, fontWeight: 700 }}>{p.name}</div><div style={{ fontSize: 11, color: "#94A3B8" }}>{p.subtitle}</div></div>
+                      </div>
+                      <MatchRateBar value={est.email} color={p.color} label="Email only" />
+                      <MatchRateBar value={est.phone} color={p.color} label="Phone only" />
+                      <MatchRateBar value={est.multi} color={p.color} label="Multi-key (est.)" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        function Step3({ selectedSegment, selectedPlatforms, expansionConfig, setExpansionConfig }) {
+          const updateConfig = (platform, key, value) => setExpansionConfig(prev => ({ ...prev, [platform]: { ...prev[platform], [key]: value } }));
+          const getEstReach = (platform) => {
+            const p = PLATFORMS[platform];
+            const cfg = expansionConfig[platform] || {};
+            if (p.expansionType === "slider") return Math.round(selectedSegment.size * (cfg.expansion || p.expansionDefault) * 2.5);
+            const idx = (p.expansionOptions || []).indexOf(cfg.expansion || p.expansionDefault);
+            return Math.round(selectedSegment.size * ([3, 6, 12, 8][idx] || 5));
+          };
+          return (
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 700 }}>Configure Expansion</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {selectedPlatforms.map(key => {
+                  const p = PLATFORMS[key];
+                  const cfg = expansionConfig[key] || {};
+                  return (
+                    <div key={key} style={{ padding: 18, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}><PlatformLogo platform={key} size={32} /><b>{p.name}</b></div>
+                        <div style={{ textAlign: "right" }}><div style={{ fontSize: 10 }}>EST. REACH</div><div style={{ fontSize: 18, fontWeight: 800 }}>{formatNumber(getEstReach(key))}</div></div>
+                      </div>
+                      {p.expansionType === "slider" ? (
+                        <input type="range" min={1} max={10} value={cfg.expansion || p.expansionDefault} onChange={e => updateConfig(key, "expansion", parseInt(e.target.value))} style={{ width: "100%", accentColor: p.color }} />
+                      ) : (
+                        <div style={{ display: "flex", gap: 8 }}>
+                          {p.expansionOptions.map(opt => (
+                            <button key={opt} onClick={() => updateConfig(key, "expansion", opt)} style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", cursor: "pointer", background: (cfg.expansion || p.expansionDefault) === opt ? p.color : "#fff", color: (cfg.expansion || p.expansionDefault) === opt ? "#fff" : "#000" }}>{opt}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        function Step4({ selectedSegment, selectedPlatforms, expansionConfig, schedule, setSchedule }) {
+          const [launched, setLaunched] = useState(false);
+          if (launched) return (
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <h2 style={{ color: "#059669" }}>Push Initiated!</h2>
+              <p>Your audiences are being processed through the Privacy Gate.</p>
+              <button onClick={() => window.location.reload()} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: "#1A5276", color: "#fff", cursor: "pointer" }}>Finish</button>
+            </div>
+          );
+          return (
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 700 }}>Schedule & Review</h2>
+              <div style={{ padding: 18, background: "#F8FAFC", borderRadius: 12 }}>
+                <div><b>Seed:</b> {selectedSegment?.name}</div>
+                <div><b>Platforms:</b> {selectedPlatforms.join(", ")}</div>
+                <div style={{ marginTop: 20, padding: 12, background: "#F0FDF4", color: "#166534", borderRadius: 8 }}><IconShield /> Privacy Gate Active: SHA-256 Hashing Enforced.</div>
+              </div>
+              <button onClick={() => setLaunched(true)} style={{ width: "100%", padding: "14px", marginTop: 20, borderRadius: 10, background: "#1A5276", color: "#fff", fontWeight: 700, cursor: "pointer" }}>
+                <IconRocket /> Push to {selectedPlatforms.length} Platforms
+              </button>
+            </div>
+          );
+        }
+
+        function LookalikeAudienceConsole() {
+          const [currentStep, setCurrentStep] = useState(0);
+          const [selectedSegment, setSelectedSegment] = useState(null);
+          const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+          const [expansionConfig, setExpansionConfig] = useState({});
+          const [schedule, setSchedule] = useState({ frequency: "daily", time: "02:00", expiry: "90", autoSpec: true });
+          const steps = [
+            { label: "Seed", sublabel: "Select 1P", icon: <IconUsers /> },
+            { label: "Platforms", sublabel: "Match rates", icon: <IconTarget /> },
+            { label: "Expansion", sublabel: "Configure", icon: <IconSliders /> },
+            { label: "Push", sublabel: "Review", icon: <IconClock /> },
+          ];
+          const canProceed = [selectedSegment !== null, selectedPlatforms.length > 0, true, true][currentStep];
+
+          return (
+            <div style={{ minHeight: "100vh", background: "#F0F4F8", fontFamily: "'Inter', sans-serif" }}>
+              <div style={{ background: "#0F172A", color: "#fff", padding: "12px 24px", display: "flex", justifyContent: "space-between" }}>
+                <div style={{ fontWeight: 800 }}>OSMOS CONTROL PLANE</div>
+                <div style={{ fontSize: 12, color: "#94A3B8" }}>Lookalike Audience Engine</div>
+              </div>
+              <div style={{ maxWidth: 880, margin: "0 auto", padding: "24px 16px" }}>
+                <div style={{ background: "#fff", borderRadius: 14, padding: "18px 0", marginBottom: 20 }}><StepIndicator steps={steps} current={currentStep} /></div>
+                <div style={{ background: "#fff", borderRadius: 14, padding: 24, minHeight: 400 }}>
+                  {currentStep === 0 && <Step1 selectedSegment={selectedSegment} setSelectedSegment={setSelectedSegment} />}
+                  {currentStep === 1 && <Step2 selectedSegment={selectedSegment} selectedPlatforms={selectedPlatforms} setSelectedPlatforms={setSelectedPlatforms} />}
+                  {currentStep === 2 && <Step3 selectedSegment={selectedSegment} selectedPlatforms={selectedPlatforms} expansionConfig={expansionConfig} setExpansionConfig={setExpansionConfig} />}
+                  {currentStep === 3 && <Step4 selectedSegment={selectedSegment} selectedPlatforms={selectedPlatforms} expansionConfig={expansionConfig} schedule={schedule} setSchedule={setSchedule} />}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
+                  <button onClick={() => setCurrentStep(s => Math.max(0, s - 1))} disabled={currentStep === 0} style={{ padding: "10px 20px", borderRadius: 8, cursor: "pointer" }}>Back</button>
+                  {currentStep < 3 && <button onClick={() => canProceed && setCurrentStep(s => s + 1)} disabled={!canProceed} style={{ padding: "10px 24px", borderRadius: 8, background: canProceed ? "#1A5276" : "#E2E8F0", color: "#fff", cursor: "pointer" }}>Continue <IconChevronRight /></button>}
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LookalikeAudienceConsole />);
+    </script>
+</body>
+</html>
